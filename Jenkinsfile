@@ -41,13 +41,17 @@ pipeline {
       }
     }
 
+    /* ===== UPDATED SONARQUBE STAGE ===== */
     stage('Static code analysis: Sonarqube') {
       when { expression { params.action == 'create' } }
       steps {
-        sh 'mvn clean package org.sonarsource.scanner.maven:sonar-maven-plugin:3.10.0.2594:sonar'
+        script {
+          statiCodeAnalysis('sonarqube-api')
+        }
       }
     }
 
+    /* ===== UPDATED QUALITY GATE STAGE ===== */
     stage('Quality Gate Status Check : Sonarqube') {
       when { expression { params.action == 'create' } }
       steps {
