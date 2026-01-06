@@ -72,10 +72,7 @@ pipeline {
 stage('Docker Image Scan: trivy') {
   steps { sh "trivy image ${params.DockerHubUser}/${params.ImageName}:${params.ImageTag}" }
 }
-stage('Docker Image Push : DockerHub') {
-  steps { sh "docker push ${params.DockerHubUser}/${params.ImageName}:${params.ImageTag}" }
-}
-stage('Docker Login') {
+  stage('Docker Login') {
   steps {
     withCredentials([usernamePassword(credentialsId: 'dockerhub-creds', passwordVariable: 'pass', usernameVariable: 'user')]) {
       sh "echo $pass | docker login -u $user --password-stdin"
@@ -83,6 +80,10 @@ stage('Docker Login') {
     }
   }
 }
+stage('Docker Image Push : DockerHub') {
+  steps { sh "docker push ${params.DockerHubUser}/${params.ImageName}:${params.ImageTag}" }
+}
+
     
 stage('Docker Image Cleanup : DockerHub') {
   steps { sh "docker rmi ${params.DockerHubUser}/${params.ImageName}:${params.ImageTag}" }
