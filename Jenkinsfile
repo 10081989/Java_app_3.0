@@ -1,7 +1,7 @@
 @Library('my-shared-library') _
 
 pipeline {
-  agent any
+  agent
 
   parameters {
     choice(name: 'action', choices: 'create\ndelete', description: 'Choose create/Destroy')
