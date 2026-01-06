@@ -67,23 +67,17 @@ pipeline {
     }
 
     stage('Docker Image Build') {
-      when { expression { params.action == 'create' } }  // Added for consistency
-      steps { sh "sudo docker build -t ${params.DockerHubUser}/${params.ImageName}:${params.ImageTag} ." }
-    }
+  steps { sh "docker build -t ${params.DockerHubUser}/${params.ImageName}:${params.ImageTag} ." }
+}
+stage('Docker Image Scan: trivy') {
+  steps { sh "trivy image ${params.DockerHubUser}/${params.ImageName}:${params.ImageTag}" }
+}
+stage('Docker Image Push : DockerHub') {
+  steps { sh "docker push ${params.DockerHubUser}/${params.ImageName}:${params.ImageTag}" }
+}
+stage('Docker Image Cleanup : DockerHub') {
+  steps { sh "docker rmi ${params.DockerHubUser}/${params.ImageName}:${params.ImageTag}" }
+}
 
-    stage('Docker Image Scan: trivy') {
-      when { expression { params.action == 'create' } }  // Added for consistency
-      steps { sh "sudo trivy image ${params.DockerHubUser}/${params.ImageName}:${params.ImageTag}" }
-    }
-
-    stage('Docker Image Push : DockerHub') {
-      when { expression { params.action == 'create' } }  // Added for consistency
-      steps { sh "sudo docker push ${params.DockerHubUser}/${params.ImageName}:${params.ImageTag}" }
-    }
-
-    stage('Docker Image Cleanup : DockerHub') {
-      when { expression { params.action == 'create' } }  // Added for consistency
-      steps { sh "sudo docker rmi ${params.DockerHubUser}/${params.ImageName}:${params.ImageTag}" }
-    }
   }  // stages closes here
 }  // pipeline closes here
