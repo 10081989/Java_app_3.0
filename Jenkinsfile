@@ -1,7 +1,6 @@
 @Library('my-shared-library') _
 
 pipeline {
-
   agent any
 
   parameters {
@@ -12,7 +11,6 @@ pipeline {
   }
 
   stages {
-
     stage('Git Checkout') {
       when { expression { params.action == 'create' } }
       steps {
@@ -41,17 +39,18 @@ pipeline {
       }
     }
 
-    /* ===== UPDATED SONARQUBE STAGE ===== */
+    /* ===== FIXED SONARQUBE STAGE ===== */
     stage('Static code analysis: Sonarqube') {
       when { expression { params.action == 'create' } }
       steps {
         script {
-          statiCodeAnalysis('sonarqube-api')
+          // Pass correct SonarQube URL to shared library
+          statiCodeAnalysis('sonarqube-api', 'http://172.31.17.163:9000')
         }
       }
     }
 
-    /* ===== UPDATED QUALITY GATE STAGE ===== */
+    /* ===== FIXED QUALITY GATE STAGE ===== */
     stage('Quality Gate Status Check : Sonarqube') {
       when { expression { params.action == 'create' } }
       steps {
@@ -106,6 +105,5 @@ pipeline {
         }
       }
     }
-
   }
 }
