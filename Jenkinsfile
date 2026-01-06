@@ -45,7 +45,7 @@ pipeline {
         sh '''
         mvn clean package sonar:sonar \
           -Dsonar.host.url=http://172.31.17.163:9000 \
-          -Dsonar.token=sqa_9ba5c81210c9a27017080841b585f938bf1d03b5
+          -Dsonar.token=sqa_18e7daeb9f7160e77c3119d05cf2da98c42e3372
         '''
       }
     }
