@@ -41,25 +41,26 @@ pipeline {
 
     /* ===== FIXED SONARQUBE STAGE ===== */
     stage('Static code analysis: Sonarqube') {
-      when { expression { params.action == 'create' } }
-      steps {
-        script {
-          // Pass correct SonarQube URL to shared library
-          statiCodeAnalysis('sonarqube-api', 'http://172.31.17.163:9000')
-        }
-      }
+  when { expression { params.action == 'create' } }
+  steps {
+    withSonarQubeEnv('sonarqube-api') {
+      sh '''
+      mvn clean package sonar:sonar \
+        -Dsonar.host.url=http://100.31.213.32:9000
+      '''
     }
+  }
+}
 
     /* ===== FIXED QUALITY GATE STAGE ===== */
     stage('Quality Gate Status Check : Sonarqube') {
-      when { expression { params.action == 'create' } }
-      steps {
-        script {
-          def SonarQubecredentialsId = 'sonarqube-api'
-          QualityGateStatus(SonarQubecredentialsId)
-        }
-      }
+  when { expression { params.action == 'create' } }
+  steps {
+    timeout(time: 5, unit: 'MINUTES') {
+      waitForQualityGate abortPipeline: true
     }
+  }
+}
 
     stage('Maven Build : maven') {
       when { expression { params.action == 'create' } }
