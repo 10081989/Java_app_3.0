@@ -69,38 +69,21 @@ stage('Quality Gate Status Check : Sonarqube') {
     }
 
     stage('Docker Image Build') {
-      when { expression { params.action == 'create' } }
-      steps {
-        script {
-          dockerBuild("${params.ImageName}", "${params.ImageTag}", "${params.DockerHubUser}")
-        }
-      }
-    }
+  steps { sh "sudo docker build -t ${params.DockerHubUser}/${params.ImageName}:${params.ImageTag} ." }
+}
 
-    stage('Docker Image Scan: trivy') {
-      when { expression { params.action == 'create' } }
-      steps {
-        script {
-          dockerImageScan("${params.ImageName}", "${params.ImageTag}", "${params.DockerHubUser}")
-        }
-      }
-    }
+stage('Docker Image Scan: trivy') {
+  steps { sh "sudo trivy image ${params.DockerHubUser}/${params.ImageName}:${params.ImageTag}" }
+}
 
-    stage('Docker Image Push : DockerHub') {
-      when { expression { params.action == 'create' } }
-      steps {
-        script {
-          dockerImagePush("${params.ImageName}", "${params.ImageTag}", "${params.DockerHubUser}")
-        }
-      }
-    }
+stage('Docker Image Push : DockerHub') {
+  steps { sh "sudo docker push ${params.DockerHubUser}/${params.ImageName}:${params.ImageTag}" }
+}
 
-    stage('Docker Image Cleanup : DockerHub') {
-      when { expression { params.action == 'create' } }
-      steps {
-        script {
-          dockerImageCleanup("${params.ImageName}", "${params.ImageTag}", "${params.DockerHubUser}")
-        }
+stage('Docker Image Cleanup : DockerHub') {
+  steps { sh "sudo docker rmi ${params.DockerHubUser}/${params.ImageName}:${params.ImageTag}" }
+}
+      
       }
     }
   }
