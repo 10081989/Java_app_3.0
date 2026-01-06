@@ -46,7 +46,7 @@ pipeline {
     withSonarQubeEnv('sonarqube-api') {
       sh '''
       mvn clean package sonar:sonar \
-        -Dsonar.host.url=http://100.31.213.32:9000
+        -Dsonar.host.url=http://172.31.17.163:9000
       '''
     }
   }
