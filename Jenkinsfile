@@ -39,15 +39,17 @@ pipeline {
       }
     }
 
-    stage('Static code analysis: Sonarqube') {
+   stage('Static code analysis: Sonarqube') {
   when { expression { params.action == 'create' } }
   steps {
     sh '''
     mvn clean package sonar:sonar \
-      -Dsonar.host.url=http://172.31.17.163:9000
+      -Dsonar.host.url=http://172.31.17.163:9000 \
+      -Dsonar.token=sqa_9ba5c81210c9a27017080841b585f938bf1d03b5
     '''
   }
 }
+
 
 stage('Quality Gate Status Check : Sonarqube') {
   when { expression { params.action == 'create' } }
