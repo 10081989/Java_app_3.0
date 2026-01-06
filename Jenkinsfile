@@ -1,7 +1,7 @@
 @Library('my-shared-library') _
 
 pipeline {
-  agent
+  agent any  // Add this complete directive
 
   parameters {
     choice(name: 'action', choices: 'create\ndelete', description: 'Choose create/Destroy')
@@ -39,25 +39,23 @@ pipeline {
       }
     }
 
-   stage('Static code analysis: Sonarqube') {
-  when { expression { params.action == 'create' } }
-  steps {
-    sh '''
-    mvn clean package sonar:sonar \
-      -Dsonar.host.url=http://172.31.17.163:9000 \
-      -Dsonar.token=sqa_9ba5c81210c9a27017080841b585f938bf1d03b5
-    '''
-  }
-}
+    stage('Static code analysis: Sonarqube') {
+      when { expression { params.action == 'create' } }
+      steps {
+        sh '''
+        mvn clean package sonar:sonar \
+          -Dsonar.host.url=http://172.31.17.163:9000 \
+          -Dsonar.token=sqa_9ba5c81210c9a27017080841b585f938bf1d03b5
+        '''
+      }
+    }
 
-
-stage('Quality Gate Status Check : Sonarqube') {
-  when { expression { params.action == 'create' } }
-  steps {
-    echo "SonarQube analysis completed successfully - check http://172.31.17.163:9000"
-  }
-}
-
+    stage('Quality Gate Status Check : Sonarqube') {
+      when { expression { params.action == 'create' } }
+      steps {
+        echo "SonarQube analysis completed successfully - check http://172.31.17.163:9000"
+      }
+    }
 
     stage('Maven Build : maven') {
       when { expression { params.action == 'create' } }
@@ -69,22 +67,23 @@ stage('Quality Gate Status Check : Sonarqube') {
     }
 
     stage('Docker Image Build') {
-  steps { sh "sudo docker build -t ${params.DockerHubUser}/${params.ImageName}:${params.ImageTag} ." }
-}
-
-stage('Docker Image Scan: trivy') {
-  steps { sh "sudo trivy image ${params.DockerHubUser}/${params.ImageName}:${params.ImageTag}" }
-}
-
-stage('Docker Image Push : DockerHub') {
-  steps { sh "sudo docker push ${params.DockerHubUser}/${params.ImageName}:${params.ImageTag}" }
-}
-
-stage('Docker Image Cleanup : DockerHub') {
-  steps { sh "sudo docker rmi ${params.DockerHubUser}/${params.ImageName}:${params.ImageTag}" }
-}
-      
-      }
+      when { expression { params.action == 'create' } }  // Added for consistency
+      steps { sh "sudo docker build -t ${params.DockerHubUser}/${params.ImageName}:${params.ImageTag} ." }
     }
-  }
-}
+
+    stage('Docker Image Scan: trivy') {
+      when { expression { params.action == 'create' } }  // Added for consistency
+      steps { sh "sudo trivy image ${params.DockerHubUser}/${params.ImageName}:${params.ImageTag}" }
+    }
+
+    stage('Docker Image Push : DockerHub') {
+      when { expression { params.action == 'create' } }  // Added for consistency
+      steps { sh "sudo docker push ${params.DockerHubUser}/${params.ImageName}:${params.ImageTag}" }
+    }
+
+    stage('Docker Image Cleanup : DockerHub') {
+      when { expression { params.action == 'create' } }  // Added for consistency
+      steps { sh "sudo docker rmi ${params.DockerHubUser}/${params.ImageName}:${params.ImageTag}" }
+    }
+  }  // stages closes here
+}  // pipeline closes here
